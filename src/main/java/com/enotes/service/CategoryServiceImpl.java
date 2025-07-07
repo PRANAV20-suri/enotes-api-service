@@ -23,26 +23,39 @@ public class CategoryServiceImpl  implements  CategorySevice{
     @Override
     public Boolean saveCategory(CategoryDto categoryDto) {
 
-       /* category.setIsDeleted(false);
-        category.setCreatedBy(1);
-        category.setCreatedOn(new Date());
-        Category saveCategory=categoryRepo.save(category);
-        */
-        Category category =mapper.map(categoryDto,Category.class);
 
-        category.setName(categoryDto.getName());
-        category.setDescription(categoryDto.getDescription());
-        category.setIsActive(categoryDto.getIsActive());
-        category.setIsDeleted(false);
-        category.setCreatedBy(1);
-        category.setCreatedOn(new Date());
-        Category saveCategory=categoryRepo.save(category);
+            if (categoryDto == null) return false;
 
-        if(ObjectUtils.isEmpty(saveCategory)){
-            return false;
+            Category category;
+
+            // Create or update based on ID
+            if (categoryDto.getId() == null) {
+                // New category
+                category = new Category();
+                category.setName(categoryDto.getName());
+                category.setDescription(categoryDto.getDescription());
+                category.setIsActive(categoryDto.getIsActive());
+                category.setIsDeleted(false);
+                category.setCreatedBy(1); // Hardcoded, ideally get from auth context
+                category.setCreatedOn(new Date());
+            } else {
+                // Update existing category
+                Optional<Category> optionalCategory = categoryRepo.findByIdAndIsDeletedFalse(categoryDto.getId());
+                if (optionalCategory.isEmpty()) return false;
+
+                category = optionalCategory.get();
+                category.setName(categoryDto.getName());
+                category.setDescription(categoryDto.getDescription());
+                category.setIsActive(categoryDto.getIsActive());
+                // isDeleted, createdBy, createdOn remains same
+            }
+
+            Category saved = categoryRepo.save(category);
+            return saved != null;
         }
-        return true;
-    }
+
+
+
 
     @Override
     public List<CategoryDto> getAllCategory() {
