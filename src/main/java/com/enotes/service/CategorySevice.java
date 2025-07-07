@@ -13,4 +13,8 @@ public interface CategorySevice {
 
     List<CategoryResponse> getActiveCategory();
 
+
+    CategoryDto categoryById(Integer id);
+
+    Boolean deleteCategory(Integer Id);
 }
